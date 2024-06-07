@@ -47,7 +47,7 @@ class PubSubItemPipeline:
     def process_item(self, item, _):
         """Publish a scraped item to Pub/Sub"""
         bytes=BytesIO(); JsonItemExporter(bytes).export_item(item)
-        data = bytes.getvalue().decode("utf-8")
+        data = bytes.getvalue()
         logger.debug(f"Publishing to Pub/Sub topic {self.topic}.")
         future = self.publisher.publish(self.topic_path, data)
         self.futures.append(future)
