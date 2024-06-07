@@ -1,7 +1,8 @@
 """Scrapy Item Pipeline for Cloud Pub/Sub"""
 # pylint: disable=too-few-public-methods
 import logging
-import json
+from io import BytesIO
+from scrapy.exporters import JsonItemExporter
 from google.cloud import pubsub_v1
 from scrapy.exceptions import NotConfigured
 
@@ -45,7 +46,8 @@ class PubSubItemPipeline:
     # pylint: disable=no-self-use
     def process_item(self, item, _):
         """Publish a scraped item to Pub/Sub"""
-        data = json.dumps(item).encode("utf-8")
+        bytes=BytesIO(); JsonItemExporter(bytes).export_item(item)
+        data = bytes.getvalue().decode("utf-8")
         logger.debug(f"Publishing to Pub/Sub topic {self.topic}.")
         future = self.publisher.publish(self.topic_path, data)
         self.futures.append(future)
